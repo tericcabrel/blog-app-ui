@@ -1,15 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import LoadingIcon from "../icons/loading";
+import AlertSuccess from "../alerts/success";
+import AlertError from "../alerts/error";
+import { padNumber } from "../utils/padNumber";
 
 type Props = {
+  handleSubscribe: (email: string) => void;
+  isSubmitSuccess?: boolean;
+  isSubmitError?: boolean;
   isSubmitting?: boolean;
+  newsletterName: string;
+  totalIssues: number;
+  totalSubscribers: number;
 };
 
-const NewsletterForm = ({ isSubmitting = false }: Props) => {
+const NewsletterForm = ({
+  handleSubscribe,
+  isSubmitError = false,
+  isSubmitSuccess = false,
+  isSubmitting = false,
+  newsletterName,
+  totalIssues,
+  totalSubscribers,
+}: Props) => {
+  const [email, setEmail] = useState<string>('');
+
+  const onSubscribeButtonClick = async () => {
+    if (!email) {
+      return;
+    }
+
+    await handleSubscribe(email);
+
+    if (isSubmitSuccess) {
+      setEmail('');
+    }
+  };
+
   return (
     <div className="w-full h-screen flex items-center bg-gray-200">
       <div className="px-12 py-10 w-1/2 mx-auto min-h-1/2 my-auto bg-white rounded-lg shadow-md">
-        <h2 className="font-bold text-3xl">Newsletter name</h2>
+        { isSubmitSuccess && <AlertSuccess /> }
+        { isSubmitError && <AlertError /> }
+        <h2 className="font-bold text-3xl">{newsletterName}</h2>
         <div className="text-gray-700 mt-8 mb-2">
           Subscribe to the newsletter to get updates about new contents and news.
         </div>
@@ -21,17 +54,20 @@ const NewsletterForm = ({ isSubmitting = false }: Props) => {
               autoComplete="off"
               id="email"
               placeholder="sundar@google.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </label>
           <button
             className="flex items-center px-6 h-[42px] text-sm font-medium leading-5 text-white bg-blue-500 border border-transparent rounded-lg focus:outline-none"
+            onClick={onSubscribeButtonClick}
           >
             { isSubmitting && <LoadingIcon />}
             Subscribe
           </button>
         </div>
         <div className="mt-4 text-gray-700">
-          Join 00 subscribers – 00 issues
+          Join {padNumber(totalSubscribers)} subscribers – {padNumber(totalIssues)} issues
         </div>
       </div>
     </div>
